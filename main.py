@@ -36,16 +36,19 @@ class Job:
         print("Search Result : %s : %s" % (area_name, result_count))
         print("pages : " + pages)
         link_list = []
-        for i in range(2):
+        for i in range(int(pages)):
             html = self.driver.page_source
             soup = bs(html, 'lxml')
             links_list = soup.select("div.slcHeadContentsInner > h3 > a")
             for a in links_list:
                 url = a.get('href')
                 link_list.append(url)
-            next_btn = self.driver.find_element_by_link_text("次へ")
-            next_btn.click()
-            time.sleep(1)
+            try:
+                next_btn = self.driver.find_element_by_link_text("次へ")
+                next_btn.click()
+                time.sleep(1)
+            except NoSuchElementException:
+                break
         print("search complete")
         #write excel
         for i in range(len(link_list)):
@@ -54,7 +57,7 @@ class Job:
         self.book.save(self.book_path)
         
 
-    def info_scrap(self, url):
+    def info_scrap(self, url, *index):
         now = datetime.datetime.now()
         year = str(now.year)
         month = str(now.month)
@@ -112,27 +115,40 @@ class Job:
             pankuzu += pan.get_text()
         print(pankuzu)
 
-        #write_sheet
-           
-        
+        slide_img_tag = soup.select('#mainContents > div.pH10.mT25 > div:nth-child(1) > div > div.slnTopImg.jscThumbCarousel > div.slnTopImgCarouselWrap.jscThumbWrap > ul > li')
+        slide_cnt = len(slide_img_tag)
+ 
+        #store_name
+        self.sheet.cell(row=index, column=2, value=str(store_name))
+        self.sheet.cell(row=index, column=3, value=st_name_kana)
+        self.sheet.cell(row=index, column=4, value=tel)
+        self.sheet.cell(row=index, column=6, value=prefecture)
+        self.sheet.cell(row=index, column=7, value=municipality)
+        self.sheet.cell(row=index, column=9, value=data_day)
+        self.sheet.cell(row=index, column=13, value=pankuzu)
+        self.sheet.cell(row=index, column=16, value=slide_cnt)
+        self.sheet.cell(row=index, column=17, value=catch_copy)
+        self.sheet.cell(row=index, column=18, value=anounce_access)
+        self.sheet.cell(row=index, column=19, value=bs_time)
+        self.sheet.cell(row=index, column=20, value=holiday)
+        self.sheet.cell(row=index, column=21, value=credit)
+        self.sheet.cell(row=index, column=23, value=fee)
+        self.sheet.cell(row=index, column=24, value=seat_cnt)
+        self.sheet.cell(row=index, column=25, value=staff_cnt)
+        self.sheet.cell(row=index, column=26, value=parking)
+        self.sheet.cell(row=index, column=27, value=commitment)
+        self.sheet.cell(row=index, column=28, value=remarks)
+        self.book.save(self.book_path)
 
 
-
-        
-
-
-
-
-
-
-    
-
-        
-
-
+book = px.load_workbook("【サンプル】ホットペッパービューティー - コピー.xlsx")
+sheet = book.worksheets[0]
 job = Job("chromedriver_win32\chromedriver.exe", "【サンプル】ホットペッパービューティー - コピー.xlsx")
-#job.url_scrap("北海道")
-job.info_scrap("https://beauty.hotpepper.jp/slnH000432065/")
+job.url_scrap("北海道", "ヘアサロン")
+for i in range(sheet.max_row):
+    job.info_scrap(sheet.cell(row=i+2, column=8).value, i+2)
+book.save("【サンプル】ホットペッパービューティー - コピー.xlsx")
+
 
 
         
