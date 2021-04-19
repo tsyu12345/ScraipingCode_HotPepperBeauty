@@ -241,7 +241,8 @@ class Job:
                     self.sheet.cell(row=index, column=c, value=None)
         self.book.save(self.book_path)
 
-job = Job("chromedriver_win32\chromedriver.exe", "【サンプル】ホットペッパービューティー copy.xlsx")
+st_time = time.time()
+job = Job("chromedriver_win32\chromedriver.exe", "【サンプル】ホットペッパービューティー copy - コピー.xlsx")
 job.url_scrap("北海道", "ヘアサロン")
 for i in range(2, job.sheet.max_row+1):
     try:
@@ -263,7 +264,8 @@ for i in range(2, job.sheet.max_row+1):
     print(".", end="")
     job.check_prefecture('北海道', i)
 print("complete data check. you can open the '.xlsx' file.")
-
+end_time = time.time() - st_time
+print("{0}".format(end_time) + "[sec]")
 
 
 

@@ -1,10 +1,8 @@
-import datetime
+import time
 
-dt_now = datetime.datetime.now()
-year = str(dt_now.year)
-month = str(dt_now.month)
-day = str(dt_now.day)
-hour = str(dt_now.hour)
-min = str(dt_now.minute)
-data_day = year + "," + month + day + "," + hour + min
-print(data_day)
+if __name__ == '__main__':
+    start = time.time()
+    for i in range(0,11):
+        print ("a")
+    elapsed_time = time.time() - start
+    print ("elapsed_time:{0}".format(elapsed_time) + "[sec]")
