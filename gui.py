@@ -1,5 +1,5 @@
 import PySimpleGUI as sig 
-#from main import Job
+#from scrap import Job
 
 layout = [
     [sig.Text("エリア入力"),],
