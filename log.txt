@@ -1,0 +1,29 @@
+Traceback (most recent call last):
+  File "C:\Users\syuku\Google ドライブ\PGバイト関連\InterRock2\main.py", line 251, in <module>
+    job.info_scrap(job.sheet.cell(row=i, column=8).value, i)
+  File "C:\Users\syuku\Google ドライブ\PGバイト関連\InterRock2\main.py", line 73, in info_scrap
+    self.driver.get(url)
+  File "C:\Users\syuku\AppData\Local\Programs\Python\Python39\lib\site-packages\selenium\webdriver\remote\webdriver.py", line 333, in get
+    self.execute(Command.GET, {'url': url})
+  File "C:\Users\syuku\AppData\Local\Programs\Python\Python39\lib\site-packages\selenium\webdriver\remote\webdriver.py", line 321, in execute
+    self.error_handler.check_response(response)
+  File "C:\Users\syuku\AppData\Local\Programs\Python\Python39\lib\site-packages\selenium\webdriver\remote\errorhandler.py", line 242, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.InvalidArgumentException: Message: invalid argument: 'url' must be a string
+  (Session info: chrome=89.0.4389.128)
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\syuku\Google ドライブ\PGバイト関連\InterRock2\main.py", line 256, in <module>
+    job.info_scrap(job.sheet.cell(row=i, column=8).value, i)
+  File "C:\Users\syuku\Google ドライブ\PGバイト関連\InterRock2\main.py", line 73, in info_scrap
+    self.driver.get(url)
+  File "C:\Users\syuku\AppData\Local\Programs\Python\Python39\lib\site-packages\selenium\webdriver\remote\webdriver.py", line 333, in get
+    self.execute(Command.GET, {'url': url})
+  File "C:\Users\syuku\AppData\Local\Programs\Python\Python39\lib\site-packages\selenium\webdriver\remote\webdriver.py", line 321, in execute
+    self.error_handler.check_response(response)
+  File "C:\Users\syuku\AppData\Local\Programs\Python\Python39\lib\site-packages\selenium\webdriver\remote\errorhandler.py", line 242, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.InvalidSessionIdException: Message: invalid session id
