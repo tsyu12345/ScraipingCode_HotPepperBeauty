@@ -269,6 +269,7 @@ if __name__ == "__main__":
     job = Job("chromedriver_win32\chromedriver.exe",
               "【サンプル】ホットペッパービューティー copy - コピー.xlsx", "北海道", "ヘアサロン")
     job.url_scrap()
+    """
     # 取得したURLを４つの配列へ分割格納
     url_set1 = []
     url_set2 = []
@@ -277,7 +278,7 @@ if __name__ == "__main__":
     append_cnt = job.sheet.max_row / 4
     for i in range(2, job.sheet.max_row+1):
         if i % append_cnt == 0:
-
+"""
     for i in range(2, job.sheet.max_row+1):
         try:
             if job.sheet.cell(row=i, column=6).value == None:

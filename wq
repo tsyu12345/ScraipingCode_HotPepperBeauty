@@ -1,0 +1,77 @@
+[33mcommit 3a40b26e18195c4c197679036858c4b6f9690880[m[33m ([m[1;36mHEAD -> [m[1;32msub_repository[m[33m, [m[1;31morigin/sub_repository[m[33m)[m
+Author: syu <syukunt@icloud.com>
+Date:   Thu Apr 22 19:27:24 2021 +0900
+
+    抽出ジャンルの選択GUI実装
+
+[33mcommit 705cab7148bd117994816f3fa9edd1817cf1bd0b[m
+Author: syu-subPC <syukunt@icloud.com>
+Date:   Tue Apr 20 19:53:00 2021 +0900
+
+    scrap.pyのif__name__部分追加、並行処理設計の開始、info_scrap()時に指定エリアの住所でない場合はメソッドを終了するように修正。
+
+[33mcommit c2962a953e5d9ba0a1677990bd2ec2c7a69e74ca[m
+Author: syu <syukunt@icloud.com>
+Date:   Tue Apr 20 12:54:57 2021 +0900
+
+    GUI制作の開始
+
+[33mcommit 67c685f2b033af854156a5b83070c6587eb0b7d3[m
+Author: syu <syukunt@icloud.com>
+Date:   Mon Apr 19 22:43:18 2021 +0900
+
+    sub_repositoryの作成
+
+[33mcommit 7417027fe6a815933670ded5fdc943e185b9fc5f[m[33m ([m[1;31morigin/master[m[33m, [m[1;32mmaster[m[33m)[m
+Author: syu <syukunt@icloud.com>
+Date:   Mon Apr 19 02:37:22 2021 +0900
+
+    8st commit
+
+[33mcommit c5e9a731498ac1857c6b52869e91060cf26c6e8e[m
+Author: syu <syukunt@icloud.com>
+Date:   Mon Apr 19 02:36:25 2021 +0900
+
+    8st commit
+
+[33mcommit 3943dca0e0cc3cd084aaf0d953692f296353e6e6[m
+Author: syu <syukunt@icloud.com>
+Date:   Mon Apr 19 02:35:59 2021 +0900
+
+    8st commit - 大体完成
+
+[33mcommit 650a4741c0f35c50797bf9c7249da1d89cce4a42[m
+Author: syu <syukunt@icloud.com>
+Date:   Sun Apr 18 02:34:28 2021 +0900
+
+    サロンデータ抽出部分に不具合：店ごとに存在しない項目が存在し、それの対応が必要。Excel入力時にずれてしまう
+
+[33mcommit 3748c842c5fbc698cfa245942f96371b91f60120[m
+Author: syu <syukunt@icloud.com>
+Date:   Sat Apr 17 15:27:05 2021 +0900
+
+    5st commit -情報を入力する部分の実装。だが記入部分でエラー有り
+
+[33mcommit c67a17180b46c9958efb1da72bbe34709d4ce339[m
+Author: syu <syukunt@icloud.com>
+Date:   Sat Apr 17 12:14:42 2021 +0900
+
+    4th commit 情報スクレイピング機能実装、残りはExcel入力部の実装のみ
+
+[33mcommit 7311c9092ed066319de19eb094f22e554eafb4e1[m
+Author: syu <syukunt@icloud.com>
+Date:   Sat Apr 17 03:15:20 2021 +0900
+
+    都道府県別の検索を行い、店舗情報のURLを取得するメソッドの実装
+
+[33mcommit d8c97a8384b0c3b3297b538eade882a836e8e4c2[m
+Author: syu <syukunt@icloud.com>
+Date:   Sat Apr 17 00:57:11 2021 +0900
+
+    2nd commit
+
+[33mcommit 0efc22f23f0e1bc566a30470750f5079a981d58e[m
+Author: syu <syukunt@icloud.com>
+Date:   Fri Apr 16 20:53:55 2021 +0900
+
+    1st commit - スクレイピング計画の素案構築、Jobクラスの設計開始
