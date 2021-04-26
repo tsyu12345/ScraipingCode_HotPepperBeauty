@@ -9,23 +9,22 @@ import time
 import datetime
 import re
 import requests as rq
-import threading
-from concurrent.futures import (ThreadPoolExecutor, wait)
+import concurrent.futures as cf
 
 
 class Job:
-    lock = threading.Lock()
 
     def __init__(self, driver_path, books_path, area_name, store_class):
         self.book_path = books_path
         self.book = px.load_workbook(books_path)
         self.sheet = self.book.worksheets[0]
+        """
         options = webdriver.ChromeOptions()
         options.add_argument('--headless')
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-gpu')
-        self.driver = webdriver.Chrome(
-            executable_path=driver_path, options=options)
+        """
+        self.driver = webdriver.Chrome(executable_path=driver_path)
         self.driver.set_window_size(1128, 768)
         self.area_name = area_name
         self.store_class = store_class
@@ -104,10 +103,10 @@ class Job:
         try:
             self.driver.find_element_by_css_selector('#jsiNavCarousel > div')
             head_img_yn = "有"
-            #self.sheet.cell(row=index, column=14, value="有")
+            # self.sheet.cell(row=index, column=14, value="有")
         except NoSuchElementException:
             head_img_yn = "無"
-            #self.sheet.cell(row=index, column=14, value="無")
+            # self.sheet.cell(row=index, column=14, value="無")
             pass
 
         table_value = soup.select('div.mT30 > table > tbody > tr > td')
@@ -234,17 +233,20 @@ class Job:
 
 
 if __name__ == "__main__":
-    st_time = time.time()
     job = Job("chromedriver_win32\chromedriver.exe",
-              "【サンプル】ホットペッパービューティー copy.xlsx", "北海道", "ヘアサロン")
+              "sample1 - コピー.xlsx", "北海道", "ヘアサロン")
 
-    def process(s_inedx, end_index):
+    def process(s_inedx, end_index, process_number):
+        
+        print("start process NO." + process_number)
         for i in range(s_inedx, end_index+1):
             if job.sheet.cell(row=i, column=8).value == None:
+                print("runnning index" + str(i))
                 job.url_scrap()
         for i in range(s_inedx, end_index+1):
             try:
                 if job.sheet.cell(row=i, column=6).value == None:
+                    print("runnning scrap_method index" + str(i))
                     print(job.sheet.cell(row=i, column=8).value)
                     job.info_scrap(job.sheet.cell(row=i, column=8).value, i)
                     job.apper_adjust(index=i)
@@ -253,22 +255,11 @@ if __name__ == "__main__":
                 job.driver.close()
                 job.info_scrap(job.sheet.cell(row=i, column=8).value, i)
                 job.apper_adjust(index=i)
-    
-    th1 = threading.Thread(target=process(2, 502))
-    th2 = threading.Thread(target=process(503, 1003))
-    th3 = threading.Thread(target=process(1004, 1504))
-    th4 = threading.Thread(target=process(1505, 2005))
-    th5 = threading.Thread(target=process(2006, 2506))
-    th1.start()
-    print("thred1...")
-    th2.start()
-    print("thred2...")
-    th3.start()
-    print("thred3...")
-    th4.start()
-    print("thred4...")
-    th5.start()
-    print("thred5...")
+        print("end process No." + process_number)
+
+    exxuter = cf.ThreadPoolExecutor(max_workers=4)
+    exxuter.submit(process, 2, 100, "1")
+    exxuter.submit(process, 101, 200, "2")
 
 """ 
     for i in range(2, job.sheet.max_row+1):
