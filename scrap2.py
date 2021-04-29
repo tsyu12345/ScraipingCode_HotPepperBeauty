@@ -5,11 +5,11 @@ from selenium.webdriver.common.keys import Keys
 from openpyxl import styles as pxstyle
 import openpyxl as px
 from bs4 import BeautifulSoup as bs
+from multiprocessing import Pool
 import time
 import datetime
 import re
 import requests as rq
-import threading as th
 
 
 class Job:
@@ -228,42 +228,37 @@ class Job:
         self.book.save(self.book_path)
 
     # 指定行までのURLリストを生成し返す
-    def make_url_list(self, start_index, stop_index):
+    def make_url_list(self, stop_index):
         url_list = []
-        for i in range(start_index, stop_index):
+        for i in range(2, stop_index):
             url_list.append(self.sheet.cell(row=i, column=8).value)
         return url_list
 
 
-if __name__ == "__main__":
-    job = Job("chromedriver_win32\chromedriver.exe", "北海道", "ヘアサロン")
-    url_list1 = job.make_url_list(2, 500)
-    print(url_list1)
-    
-    def process(s_inedx, end_index, urls):
-        for i in range(s_inedx, end_index+1):
-            if job.sheet.cell(row=i, column=8).value == None:
-                print("runnning index" + str(i))
-                job.url_scrap()
-        for i in range(s_inedx, end_index+1):
-            try:
-                if job.sheet.cell(row=i, column=6).value == None:
-                    print("runnning scrap_method index" + str(i))
-                    job.info_scrap(urls[i], i)
-                    job.apper_adjust(index=i)
-            except WebDriverException:
-                print("WebDriver Exception occured. Retrying...")
-                job.driver.close()
-                job.info_scrap(job.sheet.cell(row=i, column=8).value, i)
-                job.apper_adjust(index=i)
-    
-    th1 = th.Thread(target=process, args=(2, 100, url_list1[2:101]))
-    th2 = th.Thread(target=process, args=(101, 200, url_list1[101:201]))
-    th3 = th.Thread(target=process, args=(201, 300, [url_list1[201:301]]))
-    th4 = th.Thread(target=process, args=(301, 400, [url_list1[301:401]]))
-    th2 = th.Thread(target=process, args=(401, 500, [url_list1[401:501]]))
-        
+job = Job("chromedriver_win32\chromedriver.exe", "北海道", "ヘアサロン")
 
+
+def process1(s_inedx, end_index, url):
+    for i in range(s_inedx, end_index+1):
+        if job.sheet.cell(row=i, column=8).value == None:
+            print("runnning index" + str(i))
+            job.url_scrap()
+    for i in range(s_inedx, end_index+1):
+        try:
+            if job.sheet.cell(row=i, column=6).value == None:
+                print("runnning scrap_method index" + str(i))
+                print(job.sheet.cell(row=i, column=8).value)
+                job.info_scrap(url, i)
+                job.apper_adjust(index=i)
+        except WebDriverException:
+            print("WebDriver Exception occured. Retrying...")
+            job.driver.close()
+            job.info_scrap(url, i)
+            job.apper_adjust(index=i)
+
+
+if __name__ == "__main__":
+    
 
 """ 
     for i in range(2, job.sheet.max_row+1):

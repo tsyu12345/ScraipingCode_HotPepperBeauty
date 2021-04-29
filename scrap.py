@@ -5,16 +5,18 @@ from selenium.webdriver.common.keys import Keys
 from openpyxl import styles as pxstyle
 import openpyxl as px
 from bs4 import BeautifulSoup as bs
+from multiprocessing import Pool
 import time
 import datetime
 import re
 import requests as rq
-import concurrent.futures as cf
+
 
 
 class Job:
 
     def __init__(self, driver_path, books_path, area_name, store_class):
+
         self.book_path = books_path
         self.book = px.load_workbook(books_path)
         self.sheet = self.book.worksheets[0]
@@ -231,13 +233,11 @@ class Job:
             url_list.append(self.sheet.cell(row=i, column=8).value)
         return url_list
 
-
 if __name__ == "__main__":
     job = Job("chromedriver_win32\chromedriver.exe",
               "sample1 - コピー.xlsx", "北海道", "ヘアサロン")
 
-    def process(s_inedx, end_index, process_number):
-        
+    def process(s_inedx, end_index, process_number):        
         print("start process NO." + process_number)
         for i in range(s_inedx, end_index+1):
             if job.sheet.cell(row=i, column=8).value == None:
