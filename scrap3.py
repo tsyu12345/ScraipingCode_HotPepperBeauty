@@ -13,14 +13,19 @@ import threading as th
 from concurrent import futures
 
 class Job:
-    
+    book_path = 'sample1-原本 - コピー.xlsx'
+    book = px.load_workbook(book_path)
+    sheet = book.worksheets[0]
+
     def __init__(self, driver_path, area, store_class):
         self.driver_path = driver_path
         self.area_name = area
         self.store_class = store_class
-        self.book_path = 'sample1 - コピー.xlsx'
+        """
+        self.book_path = 'sample1-原本 - コピー.xlsx'
         self.book = px.load_workbook(self.book_path)
         self.sheet = self.book.worksheets[0]
+        """
     def url_scrap(self):
         print("starting ChromeDriver.exe....")
         driver = webdriver.Chrome(executable_path=self.driver_path)
@@ -96,6 +101,7 @@ class Job:
                 pass
             table_value = soup.select('div.mT30 > table > tbody > tr > td')
             table_menu = soup.select('div.mT30 > table > tbody > tr > th')
+            print(table_menu)
             print(table_value)
             # 住所の抽出（少々処理があるため別で書き出す）
             for j, e in enumerate(table_menu):
@@ -141,9 +147,9 @@ class Job:
             for j in range(2, len(table_value)):
                 for c in range(1, self.sheet.max_column):
                     if table_menu[j].get_text() == self.sheet.cell(row=1, column=c).value:
-                        self.sheet.cell(row=j, column=c, value=table_value[j].get_text())
+                        self.sheet.cell(row=i, column=c, value=table_value[j].get_text())
                         break
-    
+            #self.book_save()
     def book_save(self):
         self.book.save(self.book_path)
 
@@ -223,9 +229,32 @@ def process(s_index, e_index):
     job.book_save()
 
 if __name__ == "__main__":
-    th1 = th.Thread(target=process, args=(2, 10))
-    th2 = th.Thread(target=process, args=(11, 20))
-
-    th1.start()
-    th2.start() 
+    
+    def singleThread():
+        process(2, 100)
+    
+    def multiThread():
+        th1 = th.Thread(target=process, args=(2, 50))
+        th2 = th.Thread(target=process, args=(51, 100))
+        th3 = th.Thread(target=process, args=(101, 150))
+        th4 = th.Thread(target=process, args=(151, 200))
+        th1.start()
+        th2.start() 
+        th3.start()
+        th4.start()
+        th1.join()
+        th2.join()
+        th3.join()
+        th4.join()
+    
+    """
+    s_time_single = time.time()
+    singleThread()
+    end_time_single = time.time() - s_time_single
+    print("{0}".format(end_time_single) + "[sec]")
+    """
+    s_time = time.time()
+    multiThread()
+    end_time = time.time() - s_time
+    print("{0}".format(end_time) + "[sec]")
     
