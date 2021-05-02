@@ -1,8 +1,7 @@
-from openpyxl.worksheet.dimensions import SheetDimension
 from selenium import webdriver
 from selenium.common.exceptions import InvalidArgumentException, InvalidSwitchToTargetException, NoSuchElementException, TimeoutException, WebDriverException
 from selenium.webdriver.common.keys import Keys
-from openpyxl import styles as pxstyle
+from openpyxl import cell, styles as pxstyle
 import openpyxl as px
 from bs4 import BeautifulSoup as bs
 import time
@@ -10,25 +9,88 @@ import datetime
 import re
 import requests as rq
 import threading as th
-from concurrent import futures
+
 
 class Job:
+    """
     book_path = 'sample1-原本 - コピー.xlsx'
     book = px.load_workbook(book_path)
     sheet = book.worksheets[0]
-
-    def __init__(self, driver_path, area, store_class):
+    """
+    book = px.Workbook()
+    sheet = book.worksheets[0]
+    def init(self, driver_path, save_path, area, store_class):
+        #init driver
         self.driver_path = driver_path
+        self.options = webdriver.ChromeOptions()
+        self.options.add_argument('--headless')
+        self.options.add_argument('--no-sandbox')
+        self.options.add_argument('--disable-gpu')
         self.area_name = area
         self.store_class = store_class
+        #init workBook
+        """
+        n_book = px.Workbook()
+        n_sheet = n_book.worksheets[0]
+        """
+        font = pxstyle.Font(name='游ゴシック')
+        menu = [
+            "ジャンル",
+            "店舗名",
+            "店舗名カナ",
+            "電話番号", 	
+            "都道府県コード",
+            "都道府県", 
+            "市区町村・番地",
+            "店舗URL",
+            "詳細データ取得日",
+            "料金プラン着地",
+            "月額料金",	
+            "お店のホームページ",
+            "パンくず",	
+            "ヘッダー画像有無",	
+            "こだわり有無",
+            "スライド画像数",
+            "キャッチコピー",
+            "アクセス・道案内",
+            "営業時間",
+            "定休日",
+            "支払い方法",
+            "設備",
+            "カット価格",
+            "席数",	
+            "スタッフ数",
+            "駐車場",	
+            "こだわり条件",
+            "備考",
+            "スタッフ募集",
+            "最終更新日"				
+        ]
+        for c in range(1, 30+1):
+            self.sheet.cell(row=1, column=c, value=menu[c-1])
+        self.sheet.freeze_panes = "A2"
+        """
+        for r in self.sheet:
+            for c in r:
+                self.sheet[].font = font
+        """
+        dt_now = datetime.datetime.now()
+        month = str(dt_now.month)
+        day = str(dt_now.day)
+        name = month + day + "_result.xlsx"
+        self.book_path = save_path + name
+        self.book.save(save_path + name)
         """
         self.book_path = 'sample1-原本 - コピー.xlsx'
         self.book = px.load_workbook(self.book_path)
         self.sheet = self.book.worksheets[0]
         """
+    
+
+    
     def url_scrap(self):
         print("starting ChromeDriver.exe....")
-        driver = webdriver.Chrome(executable_path=self.driver_path)
+        driver = webdriver.Chrome(executable_path=self.driver_path, options=self.options)
         driver.get("https://beauty.hotpepper.jp/top/")  # top page
         sr_class = driver.find_element_by_link_text(self.store_class)
         sr_class.click()
@@ -51,6 +113,7 @@ class Job:
             links_list = soup.select("div.slcHeadContentsInner > h3 > a")
             for a in links_list:
                 url = a.get('href')
+                print(url)
                 link_list.append(url)
             try:
                 next_btn = driver.find_element_by_link_text("次へ")
@@ -67,7 +130,7 @@ class Job:
         driver.quit()
         
     def info_scrap(self, start_index, end_index):
-        driver = webdriver.Chrome(executable_path=self.driver_path)
+        driver = webdriver.Chrome(executable_path=self.driver_path, options=self.options)
         for i in range(start_index, end_index+1):
             driver.get(self.sheet.cell(row=i, column=8).value)
             html = driver.page_source
@@ -89,6 +152,7 @@ class Job:
                 tel_num = tel_num_tag.get_text()
                 print("TEL : " + tel_num)
             except:
+                tel_num = ""
                 pass
             # ヘッダー画像の有無
             try:
@@ -104,6 +168,7 @@ class Job:
             print(table_menu)
             print(table_value)
             # 住所の抽出（少々処理があるため別で書き出す）
+            pref_tf = True
             for j, e in enumerate(table_menu):
                 if e.get_text() == "住所":
                     all_address = table_value[j].get_text()
@@ -114,9 +179,12 @@ class Job:
                     prefecture = prefecture_search.group()  # 県名
                     if prefecture != self.area_name:
                         self.sheet.cell(row=i, column=8, value="")
-                        return False
+                        self.sheet.cell(row=i, column=1, value="")
+                        pref_tf = False                        
+                        break
                     jis_code = self.call_jis_code(prefecture)
                     municipality = address_low[1]  # それ以降
+            
             print("都道府県：" + prefecture)
             print("市区町村番地：" + municipality)
             catch_copy_tag = soup.select_one('#mainContents > div.pH10.mT25 > div:nth-child(1) > p > b > strong')
@@ -144,12 +212,16 @@ class Job:
             self.sheet.cell(row=i, column=17, value=catch_copy)
             self.sheet.cell(row=i, column=14, value=head_img_yn)
             # 他の情報処理
-            for j in range(2, len(table_value)):
-                for c in range(1, self.sheet.max_column):
-                    if table_menu[j].get_text() == self.sheet.cell(row=1, column=c).value:
-                        self.sheet.cell(row=i, column=c, value=table_value[j].get_text())
-                        break
+            try:
+                for j in range(2, len(table_value)):
+                    for c in range(1, self.sheet.max_column):
+                        if table_menu[j].get_text() == self.sheet.cell(row=1, column=c).value:
+                            self.sheet.cell(row=i, column=c, value=table_value[j].get_text())
+                            break
+            except RuntimeError:
+                pass
             #self.book_save()
+    
     def book_save(self):
         self.book.save(self.book_path)
 
@@ -217,36 +289,81 @@ class Job:
         data_day = year + "," + month + day + "," + hour + min
         print(data_day)
         return data_day
-    
-def process(s_index, e_index):
-    job = Job('chromedriver_win32\chromedriver.exe', '北海道', 'ヘアサロン')
-    """
-    for i in range(s_index, e_index+1):
-        if job.sheet.cell(row=i, column=8).value == None:
-            job.url_scrap()
-    """
-    job.info_scrap(s_index, e_index)
+
+def range_segmentation(maxindex):
+    rang = list(range(2, maxindex, int(maxindex / 5)))
+    print(rang)
+    return rang
+
+def process0(path, area, st_class):
+    job = Job()
+    job.init('chromedriver_win32\chromedriver.exe', path, area, st_class)
+    job.url_scrap()
     job.book_save()
 
+def process1(s_index, e_index, path, area, st_class):
+    job = Job()
+    job.init('chromedriver_win32\chromedriver.exe', path, area, st_class)
+    job.info_scrap(s_index, e_index)
+    #job.book.save()
+
+def load_max_row():
+    job = Job()
+    max_row = job.sheet.max_row
+    return max_row
+
+def multiThread(path, area, st_class):
+        sheet_index = load_max_row()
+        rng = range_segmentation(sheet_index)
+        th_s = []
+        for i in range(4):
+            if i == 0:
+                add = th.Thread(target=process1, args=(rng[0], rng[1], path, area, st_class))
+            else:
+                add = th.Thread(target=process1, args=(rng[i]+1, rng[i+1], path, area, st_class))
+            th_s.append(add)
+        add = th.Thread(target=process1, args=(rng[4]+1, sheet_index, path, area, st_class))
+        th_s.append(add)
+
+        for i in range(len(th_s)):
+            th_s[i].start()
+        for i in range(len(th_s)):
+            th_s[i].join()
+
+def main(path, area, st_class):
+    process0(path, area, st_class)
+    multiThread(path, area, st_class)
+"""
+area_name = gui.value['pref_name']
+st_class  = gui.value['store_class']
+save_path = gui.value['path']
+process0(save_path, area_name, st_class)
+multiThread(save_path, area_name, st_class)
+"""
 if __name__ == "__main__":
     
     def singleThread():
-        process(2, 100)
+        process1(2, 100)
     
     def multiThread():
-        th1 = th.Thread(target=process, args=(2, 50))
-        th2 = th.Thread(target=process, args=(51, 100))
-        th3 = th.Thread(target=process, args=(101, 150))
-        th4 = th.Thread(target=process, args=(151, 200))
-        th1.start()
-        th2.start() 
-        th3.start()
-        th4.start()
-        th1.join()
-        th2.join()
-        th3.join()
-        th4.join()
-    
+        job = Job()
+        sheet_index = load_max_row()
+        rng = range_segmentation(sheet_index)
+        th_s = []
+        for i in range(4):
+            if i == 0:
+                add = th.Thread(target=process1, args=(rng[0], rng[1]))
+            else:
+                add = th.Thread(target=process1, args=(rng[i]+1, rng[i+1]))
+            th_s.append(add)
+        add = th.Thread(target=process1, args=(rng[4]+1, sheet_index))
+        th_s.append(add)
+
+        for i in range(len(th_s)):
+            th_s[i].start()
+        for i in range(len(th_s)):
+            th_s[i].join()
+        job.book_save()
     """
     s_time_single = time.time()
     singleThread()
@@ -254,6 +371,7 @@ if __name__ == "__main__":
     print("{0}".format(end_time_single) + "[sec]")
     """
     s_time = time.time()
+    process0()
     multiThread()
     end_time = time.time() - s_time
     print("{0}".format(end_time) + "[sec]")

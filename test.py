@@ -1,8 +1,6 @@
-import time
+def range_segmentation(maxindex):
+    rang = list(range(2, maxindex, int(maxindex / 5)))
+    print(rang)
+    return rang
 
-if __name__ == '__main__':
-    start = time.time()
-    for i in range(0,11):
-        print ("a")
-    elapsed_time = time.time() - start
-    print ("elapsed_time:{0}".format(elapsed_time) + "[sec]")
+r = range_segmentation(2500)
