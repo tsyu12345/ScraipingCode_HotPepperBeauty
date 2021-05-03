@@ -1,7 +1,8 @@
 import PySimpleGUI as sig
-from PySimpleGUI.PySimpleGUI import theme_background_color, theme_input_background_color
+from PySimpleGUI.PySimpleGUI import No, theme_background_color, theme_input_background_color
 import scrap3
 import re
+import logging as log 
 
 
 # window tema
@@ -14,14 +15,14 @@ w_pad = (width / 7, 0)
 menu = ["ヘアサロン", "ネイル・まつげサロン", "リラクサロン", "エステサロン", "美容クリニック", "すべてのジャンル"]
 
 L1 = [
-    [sig.Text("都道府県　※「都道府県ごと」か「全国」の選択可　　　　　　", key='pref_title')],
+    [sig.Text("都道府県　※「都道府県ごと」か「全国」の選択可", key='pref_title', size=(60, None))],
     [sig.InputText(key=('pref_name'))],
-    [sig.Text("ジャンル選択　　　　　　　　　　　　　　　　　　　　", key="class_title"),],
-    [sig.InputOptionMenu(menu, key=("store_class"), size=(40, ))]
+    [sig.Text("ジャンル選択", key="class_title", size=(60, None)),],
+    [sig.InputOptionMenu(menu, key=("store_class"), size=(40, None))]
 ]
 
 L2 = [
-    [sig.Text("フォルダ選択                                                   ", key='path_title')],
+    [sig.Text("フォルダ選択", key='path_title', size=(60, None))],
     [sig.InputText(key='path'), sig.FolderBrowse("選択")]
 ]
 
@@ -64,9 +65,10 @@ while True:
                 win['path'].update(background_color="white")
                 checker[2] = True
         else:
-            scrap3.main(value['path'], value['pref_name'], value['store_class'])
+           scrap3.main(value['path'], value['pref_name'], value['store_class'])
+            
     #when window close
     if event in ("Quit", None):
         break
-
+log.basicConfig('./logs/log_text.log', level=log.DEBUG)
 win.close()
