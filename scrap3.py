@@ -1,3 +1,4 @@
+from PySimpleGUI.PySimpleGUI import EVENT_TIMEOUT
 from selenium import webdriver
 from selenium.common.exceptions import InvalidArgumentException, InvalidSwitchToTargetException, NoSuchElementException, TimeoutException, WebDriverException
 from selenium.webdriver.common.keys import Keys
@@ -9,7 +10,9 @@ import datetime
 import re
 import requests as rq
 import threading as th
-#from front import PopupWindow
+import sys
+import PySimpleGUI as sig
+
 
 class Job:
     """
@@ -22,11 +25,13 @@ class Job:
     scrap_counter = 0
     
     def __init__(self, path):
-        self.save_path = path
+        self.save_path = path+"/"
         dt_now = datetime.datetime.now()
         month = str(dt_now.month)
         day = str(dt_now.day)
-        self.name = month + day + "_result.xlsx"
+        hour = str(dt_now.hour)
+        min = str(dt_now.minute)
+        self.name = month + day +hour + min + "_result.xlsx"
         self.book_path = self.save_path + self.name
     
     def init(self, driver_path, area, store_class):
@@ -103,9 +108,9 @@ class Job:
         search.send_keys(self.area_name + Keys.ENTER)
         time.sleep(2)
         result_count = driver.find_element_by_css_selector(
-            '#mainContents > div.mT20.bgWhite > div.preListHead > div > p:nth-child(1) > span').text
+            'span.numberOfResult').text
         result_pages = driver.find_element_by_css_selector(
-            '#mainContents > div.mT20.bgWhite > div.preListHead > div > p.pa.bottom0.right0').text
+            'p.pa.bottom0.right0').text
         page_num = re.split('[/ ]', result_pages)
         pages = re.sub(r"\D", "", page_num[1])
         print("Search Result : %s : %s" % (self.area_name, result_count))
@@ -139,6 +144,7 @@ class Job:
         for i in range(start_index, end_index+1):
             driver.get(self.sheet.cell(row=i, column=8).value)
             self.scrap_counter += 1
+            print(self.scrap_counter)
             html = driver.page_source
             soup = bs(html, 'lxml')
             table_value = soup.select('div.mT30 > table > tbody > tr > td')
@@ -169,7 +175,7 @@ class Job:
                 store_name = store_name_tag.get_text()
                 print("店名：" + store_name)
                 st_name_kana_tag = soup.select_one(
-                    '#mainContents > div.detailHeader.cFix.pr > div > div.pL10.oh.hMin120 > div > p.fs10.fgGray')
+                    'div > p.fs10.fgGray')
                 st_name_kana = st_name_kana_tag.get_text()
                 print("店名カナ：" + st_name_kana)
                 try:
@@ -186,14 +192,14 @@ class Job:
                     pass
                 # ヘッダー画像の有無
                 try:
-                    driver.find_element_by_css_selector('#jsiNavCarousel > div')
+                    driver.find_element_by_css_selector('div.slnHeaderSliderPhoto.jscViewerPhoto')
                     head_img_yn = "有"
                     # self.sheet.cell(row=index, column=14, value="有")
                 except NoSuchElementException:
                     head_img_yn = "無"
                     # self.sheet.cell(row=index, column=14, value="無")
                     pass
-                catch_copy_tag = soup.select_one('#mainContents > div.pH10.mT25 > div:nth-child(1) > p > b > strong')
+                catch_copy_tag = soup.select_one('div > p > b > strong')
                 catch_copy = catch_copy_tag.get_text()
 
                 pankuzu_tag = soup.select('#preContents > ol > li')
@@ -202,7 +208,7 @@ class Job:
                     pankuzu += pan.get_text()
                 print(pankuzu)
 
-                slide_img_tag = soup.select('#mainContents > div.pH10.mT25 > div:nth-child(1) > div > div.slnTopImg.jscThumbCarousel > div.slnTopImgCarouselWrap.jscThumbWrap > ul > li')
+                slide_img_tag = soup.select('div.slnTopImgCarouselWrap.jscThumbWrap > ul > li')
                 slide_cnt = len(slide_img_tag)
 
                 # write Excel
@@ -297,6 +303,8 @@ class Job:
 
     def book_save(self):
         self.book.save(self.book_path)
+
+
 #other functions↓
 """
 def progress_per(percent):
@@ -314,7 +322,7 @@ def process0(path, area, st_class):
     #progress_per(10)
     job.url_scrap()
     #progress_per(20)
-    job.book_save()
+    
 
 def process1(s_index, e_index, path, area, st_class):
     job = Job(path)
@@ -358,7 +366,12 @@ def main(path, area, st_class):
     multiThread(path, area, st_class)
     print("scrap end.")
     e_time = time.time() - s_time
-    print("{0}".format(e_time) + "[sec]")
+    p_time = "{0}".format(e_time) + "[sec]"
+    try:
+        sig.popup('お疲れ様でした。抽出終了です。ファイルを確認してください。\n保存先：' + path, keep_on_top=True)
+        return 1
+    except RuntimeError:
+        return 0
     #progress_per(10)
    
 
@@ -371,4 +384,4 @@ multiThread(save_path, area_name, st_class)
 """
 if __name__ == "__main__":
     
-    main('C:/Users/syuku/Google ドライブ/PGバイト関連/InterRock2/', '沖縄県', 'ヘアサロン')
+    main('C:/Users/syuku/Google ドライブ/PGバイト関連/InterRock2', '高知県', 'ネイル・まつげサロン')

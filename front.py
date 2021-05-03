@@ -1,9 +1,10 @@
-from os import truncate
+from calendar import THURSDAY
 import PySimpleGUI as sig
 import scrap3
 import re
 import logging as log
 import threading as th
+import sys
 
 class Windows:
 
@@ -38,7 +39,7 @@ class Windows:
     def pop_layout(self):
         L = [
             [sig.Text("抽出実行中…")],
-            [sig.ProgressBar(1000, orientation="h", size=(20, 20), key="progbar")],
+            [sig.ProgressBar(100, orientation="h", size=(20, 20), key="progbar")],
             [sig.Cancel('中止')],
         ]
         return L
@@ -56,31 +57,33 @@ class Windows:
 
     def display(self):
         self.win = sig.Window("HotPepperBeautyスクレイピングツール", self.layout(), icon="icon2.ico")
+        self.sub_win = sig.Window("抽出実行", self.pop_layout(), icon="icon2.ico")
+        count = 0
+        i = 0
         while True:
             self.event, self.value = self.win.read()
+            th1 = th.Thread(target=scrap3.main, args=(self.value['path'], self.value['pref_name'], self.value['store_class']))
             print(self.event, self.value)
             if self.event == '抽出実行':
                 check = self.input_checker()
                 if check:
-                    th1 = th.Thread(target=scrap3.main, args=(self.value['path'], self.value['pref_name'], self.value['store_class']))
+                    i += 1
+                    th1.setDaemon(True)
                     th1.start()
-                    #self.pop_display()
+                    count = 1
+                    #sub_event, sub_value = self.sub_win.read()
+                    #self.sub_win['progbar'].update_bar(50)
+                    cancel = sig.popup_cancel('抽出処理中です。これには数時間かかることがあります。\n中断するには’Cancelled’ボタンを押してください。')
+                    print(cancel)
+                    if cancel in ('Cancelled', None):
+                        sys.exit()
+            #th1.join()
+                    self.done = True
+                    #sig.popup('お疲れ様でした。抽出終了です。ファイルを確認してください。\n保存先：'+self.value['path'], keep_on_top=True)
             #when window close
-            if self.event in ("Quit", None):
+            if self.event in ("Quit", None) or self.done:
                 break
         self.win.close()
-    
-    def pop_display(self):
-        self.sub_win = sig.Window("スクレイピング進行状況", self.pop_layout(), icon="icon2.ico")
-        while True:
-            sub_event = self.sub_win.read(timeout=10)
-            if sub_event in (None, '中止'):
-                break
-            self.progress_bar(scrap3.Job.scrap_counter)
-        self.sub_win.close()
-
-    def progress_bar(self, percent):
-        self.sub_win['progbar'].update_bar(percent)
 
     def input_checker(self):
         checker = [False, False, False]
